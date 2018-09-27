@@ -21,7 +21,7 @@ typedef struct sHEADER {
 
 typedef struct sWAV {
 	tHeader *header;
-	int *data;
+	int16_t *data;
 } tWAV;
 
 #endif

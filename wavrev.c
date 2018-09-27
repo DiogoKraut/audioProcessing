@@ -6,6 +6,7 @@
 int main(void) {
     FILE *i = fopen("./adele.wav", "r+");
     FILE *o = fopen("./o.wav", "w+");
+
     tWAV *w = inicializaWAV();
     tWAV *x = inicializaWAV();
 

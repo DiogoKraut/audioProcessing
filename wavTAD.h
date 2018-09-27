@@ -1,3 +1,6 @@
+#ifndef __wavTAD__
+#define __wavTAD__
+
 #include <inttypes.h>
 
 typedef struct sHEADER {
@@ -19,4 +22,6 @@ typedef struct sHEADER {
 typedef struct sWAV {
 	tHeader *header;
 	int *data;
-}
+} tWAV;
+
+#endif

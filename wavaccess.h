@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void readHeader(tWAV *w, FILE *i);
-void writeToWav(tWAV *w, FILE *o);
-void readData(tWAV *w, FILE *i);
+void readWavFile(tWAV *w, char * i);
+void writeToWav(tWAV *w, char *o);
 
 #endif

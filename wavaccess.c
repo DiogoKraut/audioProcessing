@@ -1,24 +1,31 @@
 #include "wavaccess.h"
 
-void readHeader(tWAV *w, FILE *i) {
-	// Le cabecario
-	fread(w->header, sizeof(tHeader), 1, i);
+void readWavFile(tWAV *w, char *i) {
+	if(*i == '\0') {
+		fread(w->header, sizeof(tHeader), 1, stdin);
+		w->data = (int16_t *)realloc(w->data, w->header->subChunk2Size);
+		fread(w->data, w->header->subChunk2Size, 1, stdin);
+	} else {
+		FILE *in = fopen(i, "r+");
 
-	// Le dados
-	// w->data = (int16_t *) malloc(w->header->subChunk2Size + sizeof(tHeader)); // Aloca espaco para dados
-	// fseek(i, 0, SEEK_SET);
-	// fread(w->data, sizeof(w->header->subChunk2Size + sizeof(tHeader)), 1, i);
+		fread(w->header, sizeof(tHeader), 1, in);
+		w->data = (int16_t *)realloc(w->data, w->header->subChunk2Size);
+		fread(w->data, w->header->subChunk2Size, 1, in);
+
+		fclose(in);
+	}
 }
 
-void readData(tWAV *w, FILE *i) {
-	fseek(i, 0, SEEK_SET);
-	fread(w->data, sizeof(w->header->subChunk2Size + sizeof(tHeader)-1), 1, i);
-}
+void writeToWav(tWAV *w, char *o) {
+	if(*o == '\0') {
+		fwrite(w->header, sizeof(tHeader), 1, stdout);
+		fwrite(w->data, w->header->subChunk2Size, 1, stdout);
+	} else {
+		FILE *out = fopen(o, "w+");
 
-void writeToWav(tWAV *w, FILE *o) {
-	// Escreve cabecario
-	//fwrite(w->header, sizeof(tHeader), 1, o);
-	// Escreve dados
-	fwrite(w->data, w->header->subChunk2Size + sizeof(tHeader), 1, o);
+		fwrite(w->header, sizeof(tHeader), 1, out);
+		fwrite(w->data, w->header->subChunk2Size, 1, out);
 
+		fclose(out);
+	}
 }

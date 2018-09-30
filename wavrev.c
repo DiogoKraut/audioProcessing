@@ -1,29 +1,50 @@
+#include <stdio.h>
 #include "wavaccess.h"
 #include "wavTAD.h"
-#include <stdio.h>
 #include "wavprocessing.h"
+#include "parse.h"
 
-tWAV *w, *x;
+tWAV *win, *wout;
 
-int main(void) {
-    FILE *i = fopen("./adele.wav", "r+");
-    FILE *o = fopen("./o.wav", "w+");
+int main(int argc, char * const *argv) {
+	// Aloca estrutura para tratar entrada
+	tOPT_ARGS *opts = malloc(sizeof(tOPT_ARGS));
 
-    tWAV *w   = malloc(sizeof(tWAV));
-	w->header = malloc(sizeof(tHeader));
+	if(!parseMain(argc, argv, "i:o:l:t:", opts)) abort();
 
+	// Aloca espaco para os arquivos wav
+    tWAV *win    = malloc(sizeof(tWAV));
+	win->header  = malloc(sizeof(tHeader));
+	win->data    = malloc(sizeof(int16_t));
 
-    tWAV *x   = malloc(sizeof(tWAV));
-	x->header = malloc(sizeof(tHeader));
+    tWAV *wout   = malloc(sizeof(tWAV));
+	wout->header = malloc(sizeof(tHeader));
+	wout->data   = malloc(sizeof(int16_t));
 
-    readHeader(w, i);
+	if(!win || !win->header || !wout || !wout->header || !win->data || !wout->data) {
+		fprintf(stderr, "Falha na alocacao de tWAV\n");
+		abort();
+	}
 
-    w->data = (int16_t *) malloc(w->header->subChunk2Size + sizeof(tHeader));
-    x->data = (int16_t *) malloc(w->header->subChunk2Size);
+    readWavFile(win, opts->INPUT_FILE);
 
-    readData(w, i);
-    effect_rev(w, x);
+	// Copia o cabecario e aloca espaco para dados em wout
+	memcpy(wout->header, win->header, sizeof(tHeader));
+	wout->data = malloc(wout->header->subChunk2Size);
 
-    writeToWav(x, o);
+    effect_rev(win, wout);   // Aplica o efeito REV
 
+    writeToWav(wout, opts->OUTPUT_FILE); // Escreve para arqv de saida
+
+	// Free routine
+	free(opts);
+
+	free(win->data);
+	free(win->header);
+	free(win);
+
+	free(wout->data);
+	free(wout->header);
+	free(wout);
+	return 0;
 }

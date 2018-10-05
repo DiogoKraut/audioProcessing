@@ -45,7 +45,7 @@ void volAdjust(tWAV *w, tWAV *o, float level) {
 
 void effect_echo(tWAV *w, tWAV *o, float level, int delay) {
 	int i, echo;
-
+	float x;
 	// Garantir que 0.0 <= level <= 10.0
 	if(level < 0)
 		level = 0;
@@ -62,12 +62,52 @@ void effect_echo(tWAV *w, tWAV *o, float level, int delay) {
 	auxo = (short *)o->data;
 
 	// Calcula quantas amostram teram entre o eco e a amostral atual
-	echo  = round((delay / 1000) * w->header->sample_rate);
+	echo  = round((delay / 1000.0) * w->header->sample_rate);
 	auxo += echo;
 	auxw += echo;
 
-	for(i = 0; i < (w->header->subChunk2Size / 2) - echo; i++, auxw--, auxo--) {
-		*auxo = *auxw + (level * (*auxw - echo));
+	for(i = 0; i < (w->header->subChunk2Size / 2) - echo; i++, auxw++, auxo++) {
+		x = (level * *(auxw - echo)); // Amostra do delay * level
+		if((x > 0) && (*auxw > MAX_INTERVAL - x))
+			*auxo = MAX_INTERVAL;
+		else if((x < 0) && (*auxw < MIN_INTERVAL - x))
+			*auxo = MIN_INTERVAL;
+		else
+			*auxo = *auxw + x;
+
+	}
+}
+
+void effect_wide(tWAV *w, tWAV *o, float level) {
+	int i;
+	float widening_factor;
+	// Auxiliares para percorrer dados a cada 2 bytes
+	short *auxw, *auxo;
+
+	auxw = (short *)w->data;
+	auxo = (short *)o->data;
+
+	// Se audio for estereo de 2 canais
+	if(w->header->num_channels == 2) {
+		// Para cada par de amostras (L & R) aplicar widening effect
+		for(i = 0; i < w->header->subChunk2Size / 4; i++, auxw += 2, auxo += 2) {
+			widening_factor = (*auxw - *(auxw + 1) * level); // k * diff
+
+			// Verficacao de OVERFLOW e UNDERFLOW
+			if((widening_factor > 0) && (*auxw > MAX_INTERVAL - widening_factor))
+				*auxo = MAX_INTERVAL;
+			else if((widening_factor < 0) && (*auxw < MIN_INTERVAL - widening_factor))
+				*auxo = MIN_INTERVAL;
+			else
+				*auxo = *auxw + widening_factor;
+
+			if((widening_factor < 0) && (*(auxw + 1) > MAX_INTERVAL + widening_factor))
+				*(auxo + 1) = MAX_INTERVAL;
+			else if((widening_factor > 0) && (*(auxw + 1) < MIN_INTERVAL + widening_factor))
+				*(auxo + 1) = MIN_INTERVAL;
+			else
+				*(auxo + 1) = *(auxw + 1) - widening_factor;
+		}
 	}
 }
 

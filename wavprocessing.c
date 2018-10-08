@@ -111,6 +111,51 @@ void effect_wide(tWAV *w, tWAV *o, float level) {
 	}
 }
 
+int wavConcat(tWAV *w, tWAV *o) {
+	// Apende os dados de o em w
+	// Retorna 0 na falha ou 1 no sucesso
+	if((w->header->sample_rate  != o->header->sample_rate) ||
+	   (w->header->byte_rate    != o->header->byte_rate)   ||
+	   (w->header->num_channels != o->header->num_channels))
+		return 0;
+
+	// Aloca espaco para concatenar
+	o->data = realloc(o->data, sizeof(w->data) + sizeof(o->data));
+
+	// Auxiliares para percorrer dados a cada 2 bytes
+	short *auxw, *auxo;
+
+	auxw = (short *)w->data;
+	auxo = (short *)o->data + w->header->subChunk2Size;
+
+	int i;
+	for(i = 0; i < w->header->subChunk2Size / 2; i++, auxw++, auxo++) {
+		*auxo = *auxw;
+	}
+
+	o->header->subChunk2Size += w->header->subChunk2Size;
+	return 1;
+}
+
+void effect_mix(tWAV *w, tWAV *o) {
+	// Auxiliares para percorrer dados a cada 2 bytes
+	short *auxw, *auxo;
+
+	auxw = (short *)w->data;
+	auxo = (short *)o->data;
+
+	int i;
+	for(i = 0; i < o->header->subChunk2Size && i < w->header->subChunk2Size; i++, auxw++, auxo++) {
+		// Verificacao de OVERFLOW
+		if((*auxo > 0) && (*auxo > MAX_INTERVAL - *auxw))
+				*auxo = MAX_INTERVAL;
+			else if((*auxo < 0) && (*auxo < MIN_INTERVAL - *auxw))
+				*auxo = MIN_INTERVAL;
+			else
+				*auxo += *auxw;
+	}
+}
+
 void printHeader(tWAV *w) {
 	printf("riff tag       : %.4s\n"	   , w->header->chunkID);
 	printf("riff size      : %" PRIu32 "\n", w->header->chunkSize);

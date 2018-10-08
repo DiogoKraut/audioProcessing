@@ -8,10 +8,6 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 	opterr = 0;
 	int c, i, index;
 
-	// Iniciados com uma string qualquer
-	strcpy(o->INPUT_FILE,  "");
-	strcpy(o->OUTPUT_FILE, "");
-
 	// Tratamento das opcoes de entrada
 	while((c = getopt(argc, argv, "i:o:l:t:")) != -1)
 		switch(c) {
@@ -46,4 +42,12 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 	}
 	fprintf(stderr, "Qnt de argumentos: %d Qnt maxima: %d\n", argc, MAX_INPUT_QNT);
 	return 0;
+}
+
+void inicializaOPTS(tOPT_ARGS *opt) {
+	strcpy(opt->INPUT_FILE, "");  // Inicializa com string nula
+	strcpy(opt->OUTPUT_FILE, "");
+	opt->LEVEL = 1;
+	opt->DELAY = 0;
+	opt->INPUT_LIST_SIZE = 0;
 }

@@ -13,5 +13,6 @@ void effect_echo(tWAV *w, tWAV *o, float level, int delay);
 void effect_wide(tWAV *w, tWAV *o, float level);
 int safe_add(short *op1, short *op2, int limit);
 int safe_mul(short *op1, float *op2, int limit);
+int wavConcat(tWAV *w, tWAV *o);
 
 #endif

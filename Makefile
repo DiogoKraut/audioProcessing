@@ -25,6 +25,13 @@ wavecho: wavecho.o $(OBJECTS)
 wavwide: wavwide.o $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
 
+wavcat: wavcat.o $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
+
+wavmix: wavmix.o $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
+
+
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 

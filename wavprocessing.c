@@ -35,12 +35,13 @@ void volAdjust(tWAV *w, tWAV *o, float level) {
 
 	for(i = 0; i < w->header->subChunk2Size / 2; i++, auxw++, auxo++) {
 		// Aplica mudanca de volume
-		if(*auxw > MAX_INTERVAL / level)
-			*auxo = MAX_INTERVAL;  // Overflow, seta para maior valor do interval
-		else if(*auxw < MIN_INTERVAL / level)
-			*auxo = MIN_INTERVAL;  // Underflow, seta para menor valor do intervalo
-		else
-			*auxo = *auxw * level; // Multiplicacao eh segura
+		*auxo = (short)safe_mul(*auxw, level);
+		// if(*auxw > MAX_INTERVAL / level)
+		// 	*auxo = MAX_INTERVAL;  // Overflow, seta para maior valor do interval
+		// else if(*auxw < MIN_INTERVAL / level)
+		// 	*auxo = MIN_INTERVAL;  // Underflow, seta para menor valor do intervalo
+		// else
+		// 	*auxo = *auxw * level; // Multiplicacao eh segura
 	}
 
 }
@@ -72,13 +73,14 @@ void effect_echo(tWAV *w, tWAV *o, float level, int delay) {
 
 	for(i = 0; i < (w->header->subChunk2Size / 2) - echo; i++, auxw++, auxo++) {
 		x = (level * *(auxw - echo)); // Amostra do delay * level
+		*auxo = (short)safe_add(*auxw, x);
 
-		if((x > 0) && (*auxw > MAX_INTERVAL - x))
-			*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do intervalo
-		else if((x < 0) && (*auxw < MIN_INTERVAL - x))
-			*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
-		else
-			*auxo = *auxw + x;    // Soma eh segura
+		// if((x > 0) && (*auxw > MAX_INTERVAL - x))
+		// 	*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do intervalo
+		// else if((x < 0) && (*auxw < MIN_INTERVAL - x))
+		// 	*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
+		// else
+		// 	*auxo = *auxw + x;    // Soma eh segura
 
 	}
 }
@@ -97,20 +99,22 @@ void effect_wide(tWAV *w, tWAV *o, float level) {
 		// Para cada par de amostras (L & R) aplicar widening effect
 		for(i = 0; i < w->header->subChunk2Size / 4; i++, auxw += 2, auxo += 2) {
 			widening_factor = (*auxw - *(auxw + 1) * level); // k * diff
+			*auxo       = (short)safe_add(*auxw, widening_factor);
+			*(auxo + 1) = (short)safe_sub(*(auxw + 1), widening_factor);
 
-			if((widening_factor > 0) && (*auxw > MAX_INTERVAL - widening_factor))
-				*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do intervalo
-			else if((widening_factor < 0) && (*auxw < MIN_INTERVAL - widening_factor))
-				*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
-			else
-				*auxo = *auxw + widening_factor; // Soma eh segura
-
-			if((widening_factor < 0) && (*(auxw + 1) > MAX_INTERVAL + widening_factor))
-				*(auxo + 1) = MAX_INTERVAL; // Overflow, seta para maior valor do interval
-			else if((widening_factor > 0) && (*(auxw + 1) < MIN_INTERVAL + widening_factor))
-				*(auxo + 1) = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
-			else
-				*(auxo + 1) = *(auxw + 1) - widening_factor; // Subtracao eh segura
+			// if((widening_factor > 0) && (*auxw > MAX_INTERVAL - widening_factor))
+			// 	*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do intervalo
+			// else if((widening_factor < 0) && (*auxw < MIN_INTERVAL - widening_factor))
+			// 	*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
+			// else
+			// 	*auxo = *auxw + widening_factor; // Soma eh segura
+			//
+			// if((widening_factor < 0) && (*(auxw + 1) > MAX_INTERVAL + widening_factor))
+			// 	*(auxo + 1) = MAX_INTERVAL; // Overflow, seta para maior valor do interval
+			// else if((widening_factor > 0) && (*(auxw + 1) < MIN_INTERVAL + widening_factor))
+			// 	*(auxo + 1) = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
+			// else
+			// 	*(auxo + 1) = *(auxw + 1) - widening_factor; // Subtracao eh segura
 		}
 	}
 }
@@ -148,12 +152,14 @@ void effect_mix(tWAV *w, tWAV *o) {
 	// Mistura(soma) os dados de w em o
 	int i;
 	for(i = 0; i < o->header->subChunk2Size / 2 && i < w->header->subChunk2Size / 2; i++, auxw++, auxo++) {
-		if((*auxo > 0) && (*auxo > MAX_INTERVAL - *auxw))
-				*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do interval
-			else if((*auxo < 0) && (*auxo < MIN_INTERVAL - *auxw))
-				*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
-			else
-				*auxo += *auxw;       // Multiplicacao eh segura
+		*auxo = (short)safe_mul(*auxo, *auxw);
+
+		// if((*auxo > 0) && (*auxo > MAX_INTERVAL - *auxw))
+		// 		*auxo = MAX_INTERVAL; // Overflow, seta para maior valor do interval
+		// 	else if((*auxo < 0) && (*auxo < MIN_INTERVAL - *auxw))
+		// 		*auxo = MIN_INTERVAL; // Underflow, seta para menor valor do intervalo
+		// 	else
+		// 		*auxo += *auxw;       // Multiplicacao eh segura
 	}
 }
 
@@ -181,6 +187,30 @@ void autoVolAdjust(tWAV *w, tWAV *o) {
 	// Ajusta as amostras
 	for(i = 0; i < w->header->subChunk2Size / 2; i++, auxw++, auxo++)
 		*auxo = *auxw * adjust_factor;
+}
+
+long safe_add(long a, long b, int max, int min) {
+	if((b > 0) && (a > max - b))
+		return max;
+	if((b < 0) && (a < min - b))
+		return min;
+	return a + b;
+}
+
+long safe_sub(long a, long b, int max, int min) {
+	if((b > 0) && (a < min + b))
+		return min;
+	if((b < 0) && (a > max + b))
+		return max;
+	return a - b;
+}
+
+long safe_mul(long a, long b, int max, int min) {
+	if(a > max / b)
+		return max;
+	if(a < min / b)
+		return min;
+	return a * b;
 }
 
 void printHeader(tWAV *w) {

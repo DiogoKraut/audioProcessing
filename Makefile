@@ -1,4 +1,5 @@
-TARGET = wavrev wavinfo wavvol wavecho wavwide
+# DIOGO PARIS KRAUT - GRR20166365
+TARGET = wavrev wavinfo wavvol wavecho wavwide wavcat wavmix wavautovol
 CC = gcc
 CFLAGS  = -g -Wall
 OBJECTS = wavprocessing.o wavaccess.o parse.o
@@ -31,10 +32,13 @@ wavcat: wavcat.o $(OBJECTS)
 wavmix: wavmix.o $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
 
+wavautovol: wavautovol.o $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
+
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o core
+	rm -f *.o core *.wav
 	rm -f $(TARGET)

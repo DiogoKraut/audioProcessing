@@ -1,3 +1,4 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
 
 #ifndef __wavTAD__
 #define __wavTAD__

@@ -1,3 +1,5 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
+
 #include <stdio.h>
 #include "wavaccess.h"
 #include "wavTAD.h"
@@ -9,7 +11,7 @@ tWAV *win, *wout;
 int main(int argc, char * const *argv) {
 	// Aloca estrutura para tratar entrada
 	tOPT_ARGS *opts = malloc(sizeof(tOPT_ARGS));
-
+	inicializaOPTS(opts);
 	if(!parseMain(argc, argv, "i:o:l:t:", opts)) abort();
 
 	// Aloca espaco para os arquivos wav
@@ -26,7 +28,7 @@ int main(int argc, char * const *argv) {
 		abort();
 	}
 
-    readWavFile(win, opts->INPUT_FILE);
+    readWavFile(&win, opts->INPUT_FILE);
 
 	// Copia o cabecario e aloca espaco para dados em wout
 	memcpy(wout->header, win->header, sizeof(tHeader));

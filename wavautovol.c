@@ -1,3 +1,5 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
+
 #include <stdio.h>
 #include "wavaccess.h"
 #include "wavTAD.h"
@@ -26,13 +28,13 @@ int main(int argc, char * const *argv) {
 		abort();
 	}
 
-    readWavFile(win, opts->INPUT_FILE);
+    readWavFile(&win, opts->INPUT_FILE);
 
 	// Copia o cabecario e aloca espaco para dados em wout
 	memcpy(wout->header, win->header, sizeof(tHeader));
 	wout->data = malloc(wout->header->subChunk2Size);
 
-    autoVolAdjust(win, wout, opts->LEVEL);
+    autoVolAdjust(win, wout);
 
     writeToWav(wout, opts->OUTPUT_FILE); // Escreve para arqv de saida
 

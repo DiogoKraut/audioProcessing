@@ -1,15 +1,13 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
 
 #include "parse.h"
 
-/* Tratamento da entrada baseado em
- * https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
- */
 int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 	opterr = 0;
 	int c, i, index;
 
 	// Tratamento das opcoes de entrada
-	while((c = getopt(argc, argv, "i:o:l:t:")) != -1)
+	while((c = getopt(argc, argv, "i:o:l:t:")) != -1) {
 		switch(c) {
 			case 'i':
 				strcpy(o->INPUT_FILE, optarg);
@@ -24,7 +22,7 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 				o->DELAY = atoi(optarg);
 				break;
 			case '?':
-				if (optopt == 'c')
+				if (optopt == 'i' || optopt == 'o' || optopt == 'l' || optopt == 't')
 					fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 				else
 					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -32,12 +30,15 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 			default:
 				abort();
 		}
+	}
 
 	// Argumentos sem opcao nao devem ultrapassar MAX_INPUT_QNT
 	if(argc <= MAX_INPUT_QNT) {
 		// // Cria uma lista desses argumentos;
-		for (index = optind, i = 0; index < argc; index++, i++)
-			strcpy(o->INPUT_LIST[i], argv[index]);
+		for (index = optind, i = 0; index < argc; index++, i++) {
+			strncpy(o->INPUT_LIST[i], argv[index], MAX_FILE_NAME);
+			o->INPUT_LIST_SIZE++;
+		}
 		return 1;
 	}
 	fprintf(stderr, "Qnt de argumentos: %d Qnt maxima: %d\n", argc, MAX_INPUT_QNT);
@@ -48,6 +49,6 @@ void inicializaOPTS(tOPT_ARGS *opt) {
 	strcpy(opt->INPUT_FILE, "");  // Inicializa com string nula
 	strcpy(opt->OUTPUT_FILE, "");
 	opt->LEVEL = 1;
-	opt->DELAY = 0;
+	opt->DELAY = 1000;
 	opt->INPUT_LIST_SIZE = 0;
 }

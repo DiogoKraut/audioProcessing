@@ -1,3 +1,5 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
+
 #include <stdio.h>
 #include "wavaccess.h"
 #include "wavTAD.h"
@@ -30,11 +32,11 @@ int main(int argc, char * const *argv) {
 	/* Inicio da mistura */
 	int i;
 
-    readWavFile(wout, opts->INPUT_LIST[i]); // Le o primeiro arv da lista
+    readWavFile(&wout, opts->INPUT_LIST[0]); // Le o primeiro arqv da lista
 
-	for(i = 0; i < opts->INPUT_LIST_SIZE; i++) {
-	    readWavFile(win, opts->INPUT_LIST[i]);
-	    effect_mix(win, wout);
+	for(i = 1; i < opts->INPUT_LIST_SIZE; i++) { // para cada arqv da lista
+	    readWavFile(&win, opts->INPUT_LIST[i]);  // le este arqv
+	    effect_mix(win, wout);					 // mistura no primeiro arqv
     }
     /* Fim da mistura */
 

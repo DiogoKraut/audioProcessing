@@ -40,5 +40,8 @@ wavautovol: wavautovol.o $(OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o core *.wav
+	rm -f *.o core
+
+purge:
+	rm -f *.o
 	rm -f $(TARGET)

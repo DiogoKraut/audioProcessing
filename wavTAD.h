@@ -5,7 +5,6 @@
 
 #include <inttypes.h>
 
-#define MAX_FILE_NAME 25
 #define MAX_INTERVAL  32767
 #define MIN_INTERVAL -32767
 

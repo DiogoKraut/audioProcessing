@@ -1,33 +1,34 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "wavaccess.h"
 
 void readWavFile(tWAV **w, char *i) {
-	if(*i == '\0') { // arquivo de entrada nao especificado, usar stdin
-		fread((*w)->header, sizeof(tHeader), 1, stdin);
-		(*w)->data = realloc((*w)->data, (*w)->header->subChunk2Size);
-		fread((*w)->data, (*w)->header->subChunk2Size, 1, stdin);
-	} else {
-		FILE *in = fopen(i, "r+");
+	FILE *fp;
+	if(*i == '\0')
+		fp = stdin;
+	else
+		fp = fopen(i, "r+");
 
-		fread((*w)->header, sizeof(tHeader), 1, in);
-		(*w)->data = realloc((*w)->data, (*w)->header->subChunk2Size);
-		fread((*w)->data, (*w)->header->subChunk2Size, 1, in);
+	fread((*w)->header, sizeof(tHeader), 1, fp);
+	(*w)->data = realloc((*w)->data, (*w)->header->subChunk2Size);
 
-		fclose(in);
-	}
+	// Paralelizar aqui
+	fread((*w)->data, (*w)->header->subChunk2Size, 1, fp);
+
+	fclose(fp);
 }
 
-void writeToWav(tWAV *w, char *o) {
-	if(*o == '\0') { // arquivo de saida nao especificado, usar stdout
-		fwrite(w->header, sizeof(tHeader), 1, stdout);
-		fwrite(w->data, w->header->subChunk2Size, 1, stdout);
-	} else {
-		FILE *out = fopen(o, "w+");
+void writeToWav(tWAV *w, char *i) {
+	FILE *fp;
+	if(*i == '\0')
+		fp = stdout;
+	else
+		fp = fopen(i, "w+");
 
-		fwrite(w->header, sizeof(tHeader), 1, out);
-		fwrite(w->data, w->header->subChunk2Size, 1, out);
+	fwrite(w->header, sizeof(tHeader), 1, fp);
+	fwrite(w->data, w->header->subChunk2Size, 1, fp);
 
-		fclose(out);
-	}
+	fclose(fp);
 }

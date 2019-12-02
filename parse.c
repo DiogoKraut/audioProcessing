@@ -1,10 +1,14 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "parse.h"
 
 int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 	opterr = 0;
-	int c, i, index;
+	int c;
 
 	// Tratamento das opcoes de entrada
 	while((c = getopt(argc, argv, "i:o:l:t:")) != -1) {
@@ -26,22 +30,11 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 					fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 				else
 					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-				return 0;
+				return 1;
 			default:
-				abort();
+				return 1;
 		}
 	}
-
-	// Argumentos sem opcao nao devem ultrapassar MAX_INPUT_QNT
-	if(argc <= MAX_INPUT_QNT) {
-		// // Cria uma lista desses argumentos;
-		for (index = optind, i = 0; index < argc; index++, i++) {
-			strncpy(o->INPUT_LIST[i], argv[index], MAX_FILE_NAME);
-			o->INPUT_LIST_SIZE++;
-		}
-		return 1;
-	}
-	fprintf(stderr, "Qnt de argumentos: %d Qnt maxima: %d\n", argc, MAX_INPUT_QNT);
 	return 0;
 }
 
@@ -50,5 +43,4 @@ void inicializaOPTS(tOPT_ARGS *opt) {
 	strcpy(opt->OUTPUT_FILE, "");
 	opt->LEVEL = 1;
 	opt->DELAY = 1000;
-	opt->INPUT_LIST_SIZE = 0;
 }

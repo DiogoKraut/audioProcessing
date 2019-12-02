@@ -1,18 +1,56 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include "wavaccess.h"
 #include "wavTAD.h"
-#include "wavprocessing.h"
 #include "parse.h"
 
-tWAV *win, *wout;
+void effect_echo(tWAV *w, tWAV *o, float level, int delay) {
+	int i, echo;
+	float x;
+	// Garantir que 0.0 <= level <= 10.0
+	if(level < 0)
+		level = 0;
+	else if(level > 10)
+		level = 10;
+
+	// Garantir que delay >= 0
+	if(delay < 0)
+		delay = 0;
+
+	// Auxiliares para percorrer dados a cada 2 bytes
+	short *auxw, *auxo;
+	auxw = (short *)w->data;
+	auxo = (short *)o->data;
+
+	// Calcula quantas amostram teram entre o eco e a amostra atual
+	echo  = round((delay / 1000.0) * w->header->sample_rate);
+
+	// Offset para nao ecoar amostras de antes do inicio dos dados
+	auxo += echo;
+	auxw += echo;
+
+	// Paralelizar aqui
+	for(i = echo; i < w->header->subChunk2Size / 2; i++, auxw++, auxo++) {
+		x = (level * *(auxw - echo)); // Amostra do delay * level
+
+		if( ((int)*auxw + x) > MAX_INTERVAL )
+			*auxo = MAX_INTERVAL;
+		else if( ((int)*auxw + x) < MIN_INTERVAL )
+			*auxo = MIN_INTERVAL;
+		else
+			*auxo = *auxw + x;
+	}
+}
 
 int main(int argc, char * const *argv) {
 	// Aloca estrutura para tratar entrada
 	tOPT_ARGS *opts = malloc(sizeof(tOPT_ARGS));
 	inicializaOPTS(opts);
-	if(!parseMain(argc, argv, "i:o:l:t:", opts)) abort();
+	if(parseMain(argc, argv, "i:o:l:t:", opts)) exit(EXIT_FAILURE);
 
 	// Aloca espaco para os arquivos wav
     tWAV *win    = malloc(sizeof(tWAV));

@@ -1,7 +1,7 @@
 TARGET = wavecho
 LIBS = -lm
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -fopenmp
 
 .PHONY: default all clean
 

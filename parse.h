@@ -1,9 +1,5 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "wavTAD.h"
 
 #define MAX_INPUT_QNT 15 // Numero maximo de arqvs wav que podem ser passados

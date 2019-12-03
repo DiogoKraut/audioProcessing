@@ -1,5 +1,9 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "parse.h"
 
 int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
@@ -28,7 +32,7 @@ int parseMain(int argc, char *const *argv, const char *options, tOPT_ARGS *o) {
 					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
 				return 0;
 			default:
-				abort();
+				exit(EXIT_FAILURE);
 		}
 	}
 

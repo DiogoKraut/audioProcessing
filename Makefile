@@ -1,47 +1,24 @@
-# DIOGO PARIS KRAUT - GRR20166365
-TARGET = wavrev wavinfo wavvol wavecho wavwide wavcat wavmix wavautovol
-CC = gcc
-CFLAGS  = -g -Wall
-OBJECTS = wavprocessing.o wavaccess.o parse.o
-HEADERS = $(wildcard *.h)
+TARGET = main
 LIBS = -lm
+CC = gcc
+CFLAGS = -Wall -g -fopenmp
+
+.PHONY: default all clean
 
 default: $(TARGET)
 all: default
 
-.PHONY: default all clean
-
-wavinfo: wavinfo.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavrev: wavrev.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavvol: wavvol.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavecho: wavecho.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavwide: wavwide.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavcat: wavcat.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavmix: wavmix.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
-wavautovol: wavautovol.o $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $< $(LIBS) -o $@
-
+OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
+HEADERS = $(wildcard *.h)
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-clean:
-	rm -f *.o core
+.PRECIOUS: $(TARGET) $(OBJECTS)
 
-purge:
-	rm -f *.o
-	rm -f $(TARGET)
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $@
+
+clean:
+	-rm -f *.o core $(TARGET) *.gch
+
